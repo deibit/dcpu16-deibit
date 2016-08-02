@@ -10,7 +10,6 @@
 #include <string>
 using namespace std; //TODO delete this, only for debug purposes
 #include "cpu.h"
-#include "decoder.h"
 
 CPU::~CPU() {
     delete memory;
