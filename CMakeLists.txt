@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8)
+project(dcpu16-deibit)
+file(GLOB SRC "*.h" "*.cpp")
+set (CMAKE_CXX_FLAGS "-std=c++1z -stdlib=libc++")
+add_executable(dcpu16-deibit ${SRC})
