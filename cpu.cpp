@@ -11,6 +11,29 @@
 #include "cpu.h"
 #include "memory.h"
 
+
+void Context::reset() {
+	for (auto& reg : registers) reg = 0;
+}
+
+word& Context::operator[](word i) {
+	if (i < 0x08) {
+		return registers[i];
+	} else
+		switch (i) {
+			case SP:
+				return registers[0x08];
+			case PC:
+				return registers[0x09];
+			case EX:
+				return registers[0x0a];
+			case IA:
+				return registers[0x0b];
+		}
+	std::cerr << "Register access violation: " << i << " does not exists" << std::endl;
+	exit(EXIT_FAILURE);
+}
+
 CPU::CPU() : cycles{0}, halt{false}, ctx{new Context}, memory{new Memory} {}
 
 CPU::~CPU() {

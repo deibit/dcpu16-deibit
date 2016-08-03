@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <map>
 #include <string>
+#include <iostream>
 
 using word = std::uint16_t;
 
@@ -38,28 +39,8 @@ struct Instruction {
 };
 
 struct Context {
-    void reset() {
-        for (auto& reg : registers) reg = 0;
-    }
-
-    word& operator[](word i) {
-        if (i < 0x08) {
-            return registers[i];
-        } else
-            switch (i) {
-                case SP:
-                    return registers[0x08];
-                case PC:
-                    return registers[0x09];
-                case EX:
-                    return registers[0x0a];
-                case IA:
-                    return registers[0x0b];
-            }
-        // TODO Signal error when 'i' will is out of range
-        exit(EXIT_FAILURE);
-    }
-
+    void reset();
+    word& operator[](word);
     word registers[12] = {};
 };
 
