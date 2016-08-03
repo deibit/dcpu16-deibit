@@ -1,9 +1,6 @@
-#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include "memory.h"
-
-using namespace std;
 
 void Memory::load(std::string filename) {
     try {
@@ -14,8 +11,8 @@ void Memory::load(std::string filename) {
         input_file.close();
 
     } catch (...) {
-        cout << "Loading file error" << endl;
-        exit(EXIT_FAILURE);
+        std::cout << "Loading file error" << std::endl;
+        std::exit(EXIT_FAILURE);
     }
 }
 
@@ -32,5 +29,5 @@ void Memory::dump() {
         if (op == 0) break;
         counter++;
     }
-    cout << counter << endl;
+    std::cout << counter << std::endl;
 }

@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <string>
 
 #ifndef memory_h
