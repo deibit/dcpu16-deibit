@@ -11,7 +11,8 @@
 #include <cstdlib>
 #include <map>
 #include <string>
-#include "memory.h"
+
+using word = std::uint16_t;
 
 class Memory;
 

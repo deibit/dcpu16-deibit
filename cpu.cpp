@@ -9,7 +9,7 @@
 #include <iostream>
 #include <string>
 #include "cpu.h"
-using namespace std;  // TODO delete this, only for debug purposes
+#include "memory.h"
 
 CPU::CPU() : cycles{0}, halt{false}, ctx{new Context}, memory{new Memory} {}
 
@@ -27,24 +27,24 @@ void CPU::reset() {
 }
 
 void CPU::dump() {
-    cout << "A  :" << hex << (*ctx)[A] << endl;
-    cout << "B  :" << (*ctx)[B] << endl;
-    cout << "C  :" << (*ctx)[C] << endl;
-    cout << "X  :" << (*ctx)[X] << endl;
-    cout << "Y  :" << (*ctx)[Y] << endl;
-    cout << "Z  :" << (*ctx)[Z] << endl;
-    cout << "I  :" << (*ctx)[I] << endl;
-    cout << "J  :" << (*ctx)[J] << endl;
-    cout << "SP :" << (*ctx)[SP] << endl;
-    cout << "PC :" << (*ctx)[PC] << endl;
-    cout << "EX :" << (*ctx)[EX] << endl;
-    cout << "IA :" << (*ctx)[IA] << endl;
+    std::cout << "A  :" << std::hex << (*ctx)[A] << std::endl;
+    std::cout << "B  :" << (*ctx)[B] << std::endl;
+    std::cout << "C  :" << (*ctx)[C] << std::endl;
+    std::cout << "X  :" << (*ctx)[X] << std::endl;
+    std::cout << "Y  :" << (*ctx)[Y] << std::endl;
+    std::cout << "Z  :" << (*ctx)[Z] << std::endl;
+    std::cout << "I  :" << (*ctx)[I] << std::endl;
+    std::cout << "J  :" << (*ctx)[J] << std::endl;
+    std::cout << "SP :" << (*ctx)[SP] << std::endl;
+    std::cout << "PC :" << (*ctx)[PC] << std::endl;
+    std::cout << "EX :" << (*ctx)[EX] << std::endl;
+    std::cout << "IA :" << (*ctx)[IA] << std::endl;
 }
 
 void CPU::run() {
     ctx->reset();
     if (!memory) {
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
 
     while (!halt) {
@@ -52,7 +52,7 @@ void CPU::run() {
         dump();
     }
 
-    cout << "CPU halted. Program terminate" << endl;
+    std::cout << "CPU halted. Program terminate" << std::endl;
 }
 
 /*
@@ -62,7 +62,7 @@ word CPU::fetch() {
     word next_word = (*memory)[(*ctx)[PC]];
     (*ctx)[PC]++;
     next_word = (next_word << 8 | next_word >> 8);
-    cout << hex << "Fetched: " << next_word << endl;
+    std::cout << std::hex << "Fetched: " << next_word << std::endl;
     return next_word;
 }
 
@@ -166,9 +166,9 @@ word CPU::decode_hardcoded(const word operand) {
  */
 unsigned CPU::step() {
     Instruction instr = decode(fetch());
-    cout << "Op :" << hex << instr.o << endl;
-    cout << "a  :" << hex << instr.a << endl;
-    cout << "b  :" << hex << instr.b << endl;
+    std::cout << "Op :" << std::hex << instr.o << std::endl;
+    std::cout << "a  :" << std::hex << instr.a << std::endl;
+    std::cout << "b  :" << std::hex << instr.b << std::endl;
 
     // First we deal with 0x18 operands (not a friend of opcoded in value/ref)
     if (instr.b == 0x18) {  // PUSH / [--SP]
@@ -390,7 +390,7 @@ unsigned CPU::step() {
 
     if (((*ctx)[PC] == Memory::MAX_MEM - 1) ||
         ((instr.a | instr.b | instr.o) == 0x0000)) {
-        cout << instr.b << " " << instr.a << "  " << instr.o << endl;
+        std::cout << instr.b << " " << instr.a << "  " << instr.o << std::endl;
         halt = true;
         return 0;
     }
