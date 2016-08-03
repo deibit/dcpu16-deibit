@@ -32,9 +32,9 @@ enum : word {
 };
 
 struct Instruction {
-  word a;
-  word b;
-  word o;
+    word a;
+    word b;
+    word o;
 };
 
 struct Context {
@@ -80,13 +80,13 @@ class CPU {
     Context* ctx;
     Memory* memory;
 
-	static const word mask_5 = 0x1f;  // 0b11111
-	static const word mask_6 = 0x3f;  // 0b111111
+    static const word mask_5 = 0x1f;  // 0b11111
+    static const word mask_6 = 0x3f;  // 0b111111
 
     unsigned step();
     word fetch();
     void skip();
-	const Instruction decode (word);
+    const Instruction decode(word);
     word& decode_value(word);
     word decode_hardcoded(word);
 };

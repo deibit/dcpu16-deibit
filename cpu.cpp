@@ -44,7 +44,8 @@ void CPU::dump() {
 void CPU::run() {
     ctx->reset();
     if (!memory) {
-        std::exit(EXIT_FAILURE);
+        std::cerr << "Error no memory found!" << std::endl;
+        exit(EXIT_FAILURE);
     }
 
     while (!halt) {
@@ -52,7 +53,7 @@ void CPU::run() {
         dump();
     }
 
-    std::cout << "CPU halted. Program terminate" << std::endl;
+    std::cout << "CPU halted. Program terminated" << std::endl;
 }
 
 /*
@@ -148,6 +149,9 @@ word& CPU::decode_value(const word operand) {
         case 0x1e:
             cycles += 1;
             return (*memory)[fetch()];
+        default:
+            std::cerr << "Value error: " << operand << " not recognized" << std::endl;
+            exit(EXIT_FAILURE);
     }
 }
 
@@ -385,7 +389,8 @@ unsigned CPU::step() {
             break;
 
         default:
-            break;
+            std::cerr << "Opcode error: " << instr.o << " not recognized" << std::endl;
+            exit(EXIT_FAILURE);
     }
 
     if (((*ctx)[PC] == Memory::MAX_MEM - 1) ||

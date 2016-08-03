@@ -11,13 +11,16 @@ void Memory::load(std::string filename) {
         input_file.close();
 
     } catch (...) {
-        std::cout << "Loading file error" << std::endl;
-        std::exit(EXIT_FAILURE);
+        std::cerr << "Loading file error" << std::endl;
+        exit(EXIT_FAILURE);
     }
 }
 
 word& Memory::operator[] (word i) {
-    //TODO Signal error when i is out of range
+    if (i > MAX_MEM - 1) {
+        std::cerr << "Adress " << i << " is out of range" << std::endl;
+        exit(EXIT_FAILURE);
+    }
     return memory[i];
 }
 
