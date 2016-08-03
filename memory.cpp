@@ -19,7 +19,7 @@ void Memory::load(std::string filename) {
     }
 }
 
-word& Memory::operator[] (const word i) {
+word& Memory::operator[] (word i) {
     //TODO Signal error when i is out of range
     return memory[i];
 }

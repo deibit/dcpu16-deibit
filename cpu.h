@@ -41,7 +41,7 @@ struct Context {
         for (auto& reg : registers) reg = 0;
     }
 
-    word& operator[](const word i) {
+    word& operator[](word i) {
         if (i < 0x08) {
             return registers[i];
         } else
@@ -67,7 +67,7 @@ class CPU {
     CPU();
     ~CPU();
 
-    void boot(const std::string filename);
+    void boot(std::string filename);
     void run();
     void reset();
 
@@ -85,9 +85,9 @@ class CPU {
     unsigned step();
     word fetch();
     void skip();
-	Instruction decode (const word);
-    word& decode_value(const word);
-    word decode_hardcoded(const word);
+	Instruction decode (word);
+    word& decode_value(word);
+    word decode_hardcoded(word);
 };
 
 #endif /* cpu_h */
