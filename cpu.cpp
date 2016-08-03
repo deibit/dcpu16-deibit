@@ -220,19 +220,8 @@ unsigned CPU::step() {
     int overflow = 0;
     switch (instr.o) {
         case 0x00:
-            // "The Little Great Switch"
-            switch (instr.b) {
-                case 0x01:
-                    (*ctx)[SP]--;
-                    (*memory)[(*ctx)[SP]] = (*ctx)[SP] + 1;
-                    (*ctx)[PC] = a;
-                    cycles += 3;
-                    break;
-                default:
-                    break;
-            }
-            break;
-
+			cycles += special(instr, a);
+			break;
         case 0x01:  // SET b, a
             decode_value(instr.b) = a;
             cycles += 1;
@@ -424,3 +413,18 @@ unsigned CPU::step() {
     }
     return 0;
 }
+
+unsigned CPU::special(const Instruction& instr, word a) {
+	switch (instr.b) {
+		case 0x01:
+			(*ctx)[SP]--;
+			(*memory)[(*ctx)[SP]] = (*ctx)[SP] + 1;
+			(*ctx)[PC] = a;
+			return 3;
+
+		default:
+			return 0;
+	}
+}
+
+

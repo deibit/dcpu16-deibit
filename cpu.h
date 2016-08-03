@@ -65,6 +65,7 @@ class CPU {
     static const word mask_6 = 0x3f;  // 0b111111
 
     unsigned step();
+    unsigned special(const Instruction&, word);
     word fetch();
     void skip();
     const Instruction decode(word);
