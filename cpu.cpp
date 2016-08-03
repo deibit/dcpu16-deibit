@@ -85,7 +85,7 @@ void CPU::skip() {
     f(instr.b);
 }
 
-Instruction CPU::decode(const word instr) {
+const Instruction CPU::decode(const word instr) {
     word a = static_cast<word>(mask_6 & (instr >> 10));
     word b = static_cast<word>(mask_5 & (instr >> 5));
     word o = static_cast<word>(mask_5 & (instr));

@@ -85,7 +85,7 @@ class CPU {
     unsigned step();
     word fetch();
     void skip();
-	Instruction decode (word);
+	const Instruction decode (word);
     word& decode_value(word);
     word decode_hardcoded(word);
 };
