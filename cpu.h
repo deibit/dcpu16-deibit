@@ -12,6 +12,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <vector>
 
 using word = std::uint16_t;
 
@@ -29,7 +30,7 @@ enum : word {
     SP = 0x1b,
     PC = 0x1c,
     EX = 0x1d,
-    IA = 0xd
+    IA = 0xd    // There is not hardcode value for IA in the specs
 };
 
 struct Instruction {
@@ -60,6 +61,7 @@ class CPU {
     bool halt;
     Context* ctx;
     Memory* memory;
+    std::vector<int> iq;
 
     static const word mask_5 = 0x1f;  // 0b11111
     static const word mask_6 = 0x3f;  // 0b111111
