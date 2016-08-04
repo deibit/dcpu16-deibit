@@ -35,7 +35,7 @@ word& Context::operator[](word i) {
 }
 
 CPU::CPU()
-    : cycles{0}, halt{false}, ctx{new Context}, memory{new Memory}, iq{256} {}
+    : cycles{0}, halt{false}, ctx{new Context}, memory{new Memory}, iq(256) {}
 
 CPU::~CPU() {
     delete memory;
