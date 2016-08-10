@@ -16,7 +16,7 @@ don't take it as  cserious project.
 ```bash
 mkdir build
 cd build
-cmke ..
+cmake ..
 make
 ```
 
