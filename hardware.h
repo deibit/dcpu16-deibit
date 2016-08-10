@@ -1,7 +1,7 @@
 #include <string>
 
 #ifndef hardware_h
-#define hardware_h
+#define hardware_h 1
 
 class CPU;
 
@@ -13,11 +13,14 @@ public:
   uint16_t manufacturer;
   CPU* cpu;
 
-  virtual unsigned interrupt();
-  virtual unsigned tick();
+  Hardware(std::string, uint32_t, uint16_t, uint16_t);
+  virtual ~Hardware();
+
+  virtual unsigned interrupt()=0;
+  virtual unsigned tick()=0;
+
   void query();
   void setcpu(CPU*);
-  virtual ~Hardware();
 };
 
 #endif // hardware_h
