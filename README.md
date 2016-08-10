@@ -9,4 +9,20 @@ There are lots of implementation of the DCPU16 throughout the Internet (GitHub i
 It happens that implementing a CPU emulator totally worth as an exercise for learning [computer architecture](https://en.wikipedia.org/wiki/Computer_architecture).
 
 This is by no means a introductory emulator with the only function of learning the principles of computer systems by emulating them, so
-don't take it as a serious project.
+don't take it as  cserious project.
+
+###Build
+
+```bash
+mkdir build
+cd build
+cmke ..
+make
+```
+
+###Test
+`./dcpu16-deibit ../test/sample.bin`
+
+###Compiler
+
+There is not compiler. You should bring your assembled files for now.

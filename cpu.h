@@ -77,6 +77,8 @@ class CPU {
     word fetch();
     void skip();
     const Instruction decode(word);
+    //TODO  Probably we can use here a std::pair<word,word&>
+    //      or similar and have just one function
     word& decode_value(word);
     word decode_hardcoded(word);
     unsigned interrupt();
