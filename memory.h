@@ -10,7 +10,7 @@ class Memory {
    public:
     static constexpr unsigned MAX_MEM = 0x10000;
 
-    Memory() : memory{} {}
+    Memory();
     word& operator[] (word);
     void load(std::string);
     void dump();

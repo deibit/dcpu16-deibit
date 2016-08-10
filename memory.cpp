@@ -2,11 +2,20 @@
 #include <iostream>
 #include "memory.h"
 
+Memory::Memory() : memory{} {
+
+}
+
 void Memory::load(std::string filename) {
     try {
         std::ifstream input_file(filename,
                                  std::ios_base::in | std::ios_base::binary);
 
+        // size_t size = input_file.;
+        // if (size > MAX_INPUT) {
+        //     std::cerr << "Error. File is above memory size" << std::endl;
+        //     exit(EXIT_FAILURE);
+        // }
         input_file.read(reinterpret_cast<char *>(&memory[0]), MAX_MEM);
         input_file.close();
 

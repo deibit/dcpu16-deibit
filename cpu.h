@@ -12,11 +12,15 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <deque>
 #include <vector>
 
 using word = std::uint16_t;
+// DEVICES {clock, screen}
+static constexpr unsigned DEVICES = 2;
 
 class Memory;
+class Hardware;
 
 enum : word {
     A = 0x00,
@@ -48,31 +52,34 @@ struct Context {
 class CPU {
    public:
     CPU();
-    ~CPU();
+    virtual ~CPU();
 
-    void boot(std::string filename);
+    void boot(const std::string filename);
     void run();
     void reset();
-
     void dump();
+    Context& context();
 
    private:
     unsigned cycles;
     bool halt;
-    Context* ctx;
     Memory* memory;
-    std::vector<int> iq;
+    bool queuing;
+    Context* ctx;
+    std::deque<int> iq;
+    std::vector<Hardware*> devices;
 
     static const word mask_5 = 0x1f;  // 0b11111
     static const word mask_6 = 0x3f;  // 0b111111
 
     unsigned step();
-    unsigned special(const Instruction&, word);
+    unsigned special(const Instruction&, word&);
     word fetch();
     void skip();
     const Instruction decode(word);
     word& decode_value(word);
     word decode_hardcoded(word);
+    unsigned interrupt();
 };
 
 #endif /* cpu_h */

@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string>
 #include "memory.h"
+#include "clock.h"
 
 void Context::reset() {
     for (auto& reg : registers) reg = 0;
@@ -35,11 +36,20 @@ word& Context::operator[](word i) {
 }
 
 CPU::CPU()
-    : cycles{0}, halt{false}, ctx{new Context}, memory{new Memory}, iq(256) {}
+    : cycles{0}, halt{false}, ctx{new Context}, memory{new Memory},
+        queuing{false}, iq{}, devices{} {
+            Hardware *hardware = new Clock();
+            hardware->setcpu(this);
+            devices.push_back(hardware);
+        }
 
 CPU::~CPU() {
     delete memory;
     delete ctx;
+}
+
+Context& CPU::context(){
+    return *ctx;
 }
 
 void CPU::boot(const std::string filename) { memory->load(filename); }
@@ -88,6 +98,7 @@ word CPU::fetch() {
     (*ctx)[PC]++;
     next_word = (next_word << 8 | next_word >> 8);
     std::cout << std::hex << "Fetched: " << next_word << std::endl;
+
     return next_word;
 }
 
@@ -221,39 +232,33 @@ unsigned CPU::step() {
     int overflow = 0;
     switch (instr.o) {
         case 0x00:
-            cycles += special(instr, a);
-            break;
+            return special(instr, a);
         case 0x01:  // SET b, a
             decode_value(instr.b) = a;
-            cycles += 1;
-            break;
+            return 1;
 
         // Arithmetics
         case 0x02:  // ADD b, a
             overflow = decode_value(instr.b) + a;
             (*ctx)[EX] = overflow >> 16;
             decode_value(instr.b) = overflow;
-            cycles += 2;
-            break;
+            return 2;
         case 0x03:  // SUB b, a
             overflow = decode_value(instr.b) - a;
             (*ctx)[EX] = overflow >> 16;
             decode_value(instr.b) = overflow;
-            cycles += 2;
-            break;
+            return 2;
         case 0x04:  // MUL b, a
             overflow = decode_value(instr.b) * a;
             (*ctx)[EX] = overflow >> 16;
             decode_value(instr.b) = overflow;
-            cycles += 2;
-            break;
+            return 2;
         case 0x05:  // MLI b, a
             overflow = static_cast<int16_t>(decode_value(instr.b)) *
                        static_cast<int16_t>(a);
             (*ctx)[EX] = overflow >> 16;
             decode_value(instr.b) = overflow;
-            cycles += 2;
-            break;
+            return 2;
         case 0x06:  // DIV b, a
             if (a == 0) {
                 (*ctx)[EX] = 0;
@@ -262,8 +267,7 @@ unsigned CPU::step() {
                 (*ctx)[EX] = overflow;
                 decode_value(instr.b) = overflow >> 16;
             }
-            cycles += 3;
-            break;
+            return 3;
         case 0x07:  // DVI b, a
             if (a == 0) {
                 (*ctx)[EX] = 0;
@@ -273,133 +277,112 @@ unsigned CPU::step() {
                 (*ctx)[EX] = overflow;
                 decode_value(instr.b) = overflow >> 16;
             }
-            cycles += 3;
-            break;
+            return 3;
 
         // Logical
         case 0x08:  // MOD b, a
             decode_value(instr.b) %= a;
-            cycles += 3;
-            break;
+            return 3;
         case 0x09:  // MDI b, a
             decode_value(instr.b) =
                 static_cast<int16_t>(decode_value(instr.b)) % a;
-            cycles += 3;
-            break;
+            return 3;
         case 0x0a:  // AND b, a
             decode_value(instr.b) &= a;
-            cycles += 1;
-            break;
+            return 1;
         case 0x0b:  // BOR b, a
             decode_value(instr.b) |= a;
-            cycles += 1;
-            break;
+            return 1;
         case 0x0c:  // XOR b, a
             decode_value(instr.b) ^= a;
-            cycles += 1;
-            break;
+            return 1;
 
         // Bit shifting
         case 0x0d:  // SHR b, a
             (*ctx)[EX] = (static_cast<uint>(decode_value(instr.b)) << 16) >> a;
             decode_value(instr.b) >>= a;
-            cycles += 1;
-            break;
+            return 1;
         case 0x0e:  // ASR b, a
             (*ctx)[EX] = (static_cast<uint>(decode_value(instr.b)) << 16) >> a;
             decode_value(instr.b) =
                 static_cast<int16_t>(decode_value(instr.b)) >> a;
-            cycles += 1;
-            break;
+            return 1;
         case 0x0f:  // SHL b, a
             (*ctx)[EX] = (static_cast<uint>(decode_value(instr.b)) << a) >> 16;
             decode_value(instr.b) <<= a;
-            cycles += 1;
-            break;
+            return 1;
 
         // Branching
         case 0x10:  // IFB b, a
             if (!((decode_value(instr.b) & a) != 0)) {
-                cycles += 3;
                 skip();
+                return 3;
             }
-            cycles += 2;
-            break;
+            return 2;
         case 0x11:  // IFC b, a
             if (!((decode_value(instr.b) & a) == 0)) {
-                cycles += 3;
                 skip();
+                return 3;
             }
-            cycles += 2;
-            break;
+            return 2;
         case 0x12:  // IFE b, a
             if (!(decode_value(instr.b) == a)) {
-                cycles += 3;
                 skip();
+                return 3;
             }
-            cycles += 2;
-            break;
+            return 2;
         case 0x13:  // IFN b, a
             if (!(decode_value(instr.b) != a)) {
-                cycles += 3;
                 skip();
+                return 3;
             }
-            cycles += 2;
-            break;
+            return 2;
         case 0x14:  // IFG b, a
             if (!(decode_value(instr.b) > a)) {
-                cycles += 3;
                 skip();
+                return 3;
             }
-            cycles += 2;
-            break;
+            return 2;
         case 0x15:  // IFA b, a
             if (!(decode_value(instr.b) > a)) {
-                cycles += 3;
                 skip();
+                return 3;
             }
-            cycles += 2;
-            break;
+            return 2;
         case 0x16:  // IFL b, a
             if (!(decode_value(instr.b) < a)) {
-                cycles += 3;
                 skip();
+                return 3;
             }
-            cycles += 2;
-            break;
+            return 2;
         case 0x17:  // IFU b, a
             if (!(decode_value(instr.b) < a)) {
-                cycles += 3;
                 skip();
+                return 3;
             }
-            cycles += 2;
-            break;
+            return 2;
 
         // Other setters
         case 0x1a:  // ADX b, a
             overflow = decode_value(instr.b) + a + (*ctx)[EX];
             (*ctx)[EX] = overflow >> 16;
             decode_value(instr.b) = overflow;
-            cycles += 3;
-            break;
+            return 3;
         case 0x1b:  // SBX b, a
             overflow = decode_value(instr.b) - a + (*ctx)[EX];
             (*ctx)[EX] = overflow >> 16;
             decode_value(instr.b) = overflow;
-            cycles += 3;
-            break;
+            return 3;
         case 0x1e:  // STI b, a
             decode_value(instr.b) = a;
             (*ctx)[I]++;
             (*ctx)[J]++;
-            cycles += 2;
-            break;
+            return 2;
         case 0x1f:  // STD b, a
             decode_value(instr.b) = a;
             (*ctx)[I]--;
             (*ctx)[J]--;
-            cycles += 2;
-            break;
+            return 2;
 
         default:
             std::cerr << "Opcode error: " << instr.o << " not recognized"
@@ -407,6 +390,8 @@ unsigned CPU::step() {
             exit(EXIT_FAILURE);
     }
 
+    //TODO Consider programs that relies on complete a memory overflow and
+    //starts again at 0x0000 position (who knows?)
     if (((*ctx)[PC] == Memory::MAX_MEM - 1) ||
         ((instr.a | instr.b | instr.o) == 0x0000)) {
         std::cout << instr.b << " " << instr.a << "  " << instr.o << std::endl;
@@ -416,28 +401,35 @@ unsigned CPU::step() {
     return 0;
 }
 
-unsigned CPU::special(const Instruction& instr, word a) {
+unsigned CPU::special(const Instruction& instr, word& a) {
     switch (instr.b) {
-        case 0x01:
+        case 0x01:      // JSR a
             (*ctx)[SP]--;
             (*memory)[(*ctx)[SP]] = (*ctx)[SP] + 1;
             (*ctx)[PC] = a;
             return 3;
-        case 0x08:
+        case 0x08:      // INT a
             return 4;
-        case 0x09:
+        case 0x09:      // IAG a
+            a = (*ctx)[IA];
             return 1;
-        case 0x0a:
+        case 0x0a:      // IAS a
+            (*ctx)[IA] = a;
             return 1;
-        case 0x0b:
+        case 0x0b:      // RFI a
+            queuing = false;
+            (*ctx)[A] = (*ctx)[SP]++;
+            (*ctx)[PC] = (*ctx)[SP]++;
             return 3;
-        case 0x0c:
+        case 0x0c:      // IAQ a
+            a!=0 ? queuing = false : queuing = true;
             return 2;
-        case 0x10:
+        case 0x10:      // HWN a
+            a = static_cast<word>(devices.size());
             return 2;
-        case 0x11:
+        case 0x11:      // HWQ a
             return 4;
-        case 0x12:
+        case 0x12:      // HWI a
             return 4;
 
         default:
