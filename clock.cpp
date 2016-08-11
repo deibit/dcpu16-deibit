@@ -5,5 +5,6 @@ Clock::Clock()
 
 Clock::~Clock() {}
 
+unsigned Clock::interrupt(word msg) { return 0; }
 unsigned Clock::interrupt() { return 0; }
 unsigned Clock::tick() { return 0; }

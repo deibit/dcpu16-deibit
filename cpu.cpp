@@ -46,6 +46,7 @@ CPU::CPU()
 CPU::~CPU() {
     delete memory;
     delete ctx;
+    for (auto& i: devices) delete i;
 }
 
 Context& CPU::context(){
@@ -422,14 +423,20 @@ unsigned CPU::special(const Instruction& instr, word& a) {
             (*ctx)[PC] = (*ctx)[SP]++;
             return 3;
         case 0x0c:      // IAQ a
-            a!=0 ? queuing = false : queuing = true;
+            a !=0 ? queuing = true : queuing = false;
             return 2;
         case 0x10:      // HWN a
             a = static_cast<word>(devices.size());
             return 2;
         case 0x11:      // HWQ a
+            if (a <= devices.size()) {
+                devices[a]->query();
+            }
             return 4;
         case 0x12:      // HWI a
+            if (a <= devices.size()) {
+                devices[a]->interrupt();
+            }
             return 4;
 
         default:

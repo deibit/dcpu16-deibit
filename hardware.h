@@ -2,6 +2,8 @@
 
 #pragma once
 
+using word = uint16_t;
+
 class CPU;
 
 class Hardware {
@@ -15,6 +17,7 @@ public:
   Hardware(std::string, uint32_t, uint16_t, uint16_t);
   virtual ~Hardware();
 
+  virtual unsigned interrupt(word)=0;
   virtual unsigned interrupt()=0;
   virtual unsigned tick()=0;
 

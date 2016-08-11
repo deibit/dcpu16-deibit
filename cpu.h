@@ -60,9 +60,9 @@ class CPU {
    private:
     unsigned cycles;
     bool halt;
+    Context* ctx;
     Memory* memory;
     bool queuing;
-    Context* ctx;
     std::deque<int> iq;
     std::vector<Hardware*> devices;
 
