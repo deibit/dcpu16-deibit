@@ -5,8 +5,7 @@
 //  Created by david on 26/7/16.
 //
 //
-#ifndef cpu_h
-#define cpu_h
+#pragma once
 
 #include <cstdlib>
 #include <map>
@@ -16,8 +15,6 @@
 #include <vector>
 
 using word = std::uint16_t;
-// DEVICES {clock, screen}
-static constexpr unsigned DEVICES = 2;
 
 class Memory;
 class Hardware;
@@ -83,5 +80,3 @@ class CPU {
     word decode_hardcoded(word);
     unsigned interrupt();
 };
-
-#endif /* cpu_h */

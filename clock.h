@@ -1,7 +1,6 @@
 #include "hardware.h"
 
-#ifndef clock_h
-#define clock_h
+#pragma once
 
 class Clock : public Hardware {
    public:
@@ -10,5 +9,3 @@ class Clock : public Hardware {
     unsigned interrupt() override;
     unsigned tick() override;
 };
-
-#endif /* ifndef clock_h */

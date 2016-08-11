@@ -1,7 +1,6 @@
 #include <string>
 
-#ifndef hardware_h
-#define hardware_h 1
+#pragma once
 
 class CPU;
 
@@ -22,5 +21,3 @@ public:
   void query();
   void setcpu(CPU*);
 };
-
-#endif // hardware_h

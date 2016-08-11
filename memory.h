@@ -1,8 +1,7 @@
 #include <cstdlib>
 #include <string>
 
-#ifndef memory_h
-#define memory_h
+#pragma once
 
 using word = std::uint16_t;
 
@@ -19,4 +18,3 @@ class Memory {
     word memory[MAX_MEM];
 };
 
-#endif /* memory_h */
