@@ -15,9 +15,9 @@ void Hardware::setcpu(CPU* cpu) {
 void Hardware::query() {
     if (cpu) {
         cpu->context()[A] = ID;
-        cpu->context()[B] = ID << 16;
+        cpu->context()[B] = ID >> 16;
         cpu->context()[C] = version;
         cpu->context()[X] = manufacturer;
-        cpu->context()[Y] = manufacturer << 16;
+        cpu->context()[Y] = manufacturer >> 16;
     }
 }
