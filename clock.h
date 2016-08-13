@@ -11,4 +11,10 @@ class Clock : public Hardware {
     unsigned interrupt(word msg) override;
     unsigned interrupt() override;
     unsigned tick() override;
+
+   private:
+    uint16_t divisor;
+    uint16_t elapsed_ticks;
+    uint16_t ticks;
+    bool stop;
 };

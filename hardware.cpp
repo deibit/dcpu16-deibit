@@ -1,5 +1,4 @@
 #include "hardware.h"
-#include "cpu.h"
 
 Hardware::Hardware(std::string n, uint32_t id, uint16_t ver, uint16_t man) :
     name(n), ID(id), version(ver), manufacturer(man), cpu{nullptr} {}
@@ -10,10 +9,6 @@ Hardware::~Hardware() {
 
 void Hardware::setcpu(CPU* cpu) {
     this->cpu = cpu;
-}
-
-CPU* Hardware::getcpu() {
-    return cpu;
 }
 
 void Hardware::query() {
