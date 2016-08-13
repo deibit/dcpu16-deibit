@@ -11,7 +11,6 @@
 #include <map>
 #include <string>
 #include <iostream>
-#include <deque>
 #include <vector>
 
 using word = std::uint16_t;
@@ -59,11 +58,12 @@ class CPU {
 
    private:
     unsigned cycles;
-    bool halt;
+    bool halt; // and
+    bool catch_fire;
     Context* ctx;
     Memory* memory;
     bool queuing;
-    std::deque<int> iq;
+    std::vector<int> iq;
     std::vector<Hardware*> devices;
 
     static const word mask_5 = 0x1f;  // 0b11111
@@ -78,5 +78,5 @@ class CPU {
     //      or similar and have just one function
     word& decode_value(word);
     word decode_hardcoded(word);
-    unsigned interrupt();
+    void interrupt(word);
 };

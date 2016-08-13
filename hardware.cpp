@@ -12,6 +12,10 @@ void Hardware::setcpu(CPU* cpu) {
     this->cpu = cpu;
 }
 
+CPU* Hardware::getcpu() {
+    return cpu;
+}
+
 void Hardware::query() {
     if (cpu) {
         cpu->context()[A] = ID;

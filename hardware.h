@@ -23,4 +23,5 @@ public:
 
   void query();
   void setcpu(CPU*);
+  CPU* getcpu();
 };

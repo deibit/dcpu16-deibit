@@ -9,8 +9,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
-#include "memory.h"
 #include "clock.h"
+#include "memory.h"
 
 void Context::reset() {
     for (auto& reg : registers) reg = 0;
@@ -36,22 +36,26 @@ word& Context::operator[](word i) {
 }
 
 CPU::CPU()
-    : cycles{0}, halt{false}, ctx{new Context}, memory{new Memory},
-        queuing{false}, iq{}, devices{} {
-            Hardware *hardware = new Clock();
-            hardware->setcpu(this);
-            devices.push_back(hardware);
-        }
+    : cycles{0},
+      halt{false},
+      catch_fire{false},
+      ctx{new Context},
+      memory{new Memory},
+      queuing{false},
+      iq{},
+      devices{} {
+    Hardware* hardware = new Clock();
+    hardware->setcpu(this);
+    devices.push_back(hardware);
+}
 
 CPU::~CPU() {
     delete memory;
     delete ctx;
-    for (auto& i: devices) delete i;
+    for (auto& i : devices) delete i;
 }
 
-Context& CPU::context(){
-    return *ctx;
-}
+Context& CPU::context() { return *ctx; }
 
 void CPU::boot(const std::string filename) { memory->load(filename); }
 
@@ -79,12 +83,17 @@ void CPU::dump() {
 void CPU::run() {
     ctx->reset();
     if (!memory) {
-        std::cerr << "Error no memory found!" << std::endl;
+        std::cerr << "Error memory not found" << std::endl;
         exit(EXIT_FAILURE);
     }
 
+    unsigned cycles_for_hardware = 0;
     while (!halt) {
-        cycles += step();
+        cycles_for_hardware = step();
+        cycles += cycles_for_hardware;
+        for (unsigned i = 0; i < cycles_for_hardware ; ++i) {
+            for (auto& device : devices) device->tick();
+        }
         dump();
     }
 
@@ -391,8 +400,8 @@ unsigned CPU::step() {
             exit(EXIT_FAILURE);
     }
 
-    //TODO Consider programs that relies on complete a memory overflow and
-    //starts again at 0x0000 position (who knows?)
+    // TODO Consider programs that relies on complete a memory overflow and
+    // starts again at 0x0000 position (who knows?)
     if (((*ctx)[PC] == Memory::MAX_MEM - 1) ||
         ((instr.a | instr.b | instr.o) == 0x0000)) {
         std::cout << instr.b << " " << instr.a << "  " << instr.o << std::endl;
@@ -403,43 +412,65 @@ unsigned CPU::step() {
 }
 
 unsigned CPU::special(const Instruction& instr, word& a) {
+    // You're special!
     switch (instr.b) {
-        case 0x01:      // JSR a
+        case 0x01:  // JSR a
             (*ctx)[SP]--;
             (*memory)[(*ctx)[SP]] = (*ctx)[SP] + 1;
             (*ctx)[PC] = a;
             return 3;
-        case 0x08:      // INT a
+        case 0x08:  // INT a
+            if (queuing) {
+                iq.push_back(a);
+            } else {
+                interrupt(a);
+            }
+            if (iq.size() > 256) {
+                catch_fire = true;
+            }
             return 4;
-        case 0x09:      // IAG a
+        case 0x09:  // IAG a
             a = (*ctx)[IA];
             return 1;
-        case 0x0a:      // IAS a
+        case 0x0a:  // IAS a
             (*ctx)[IA] = a;
             return 1;
-        case 0x0b:      // RFI a
+        case 0x0b:  // RFI a
             queuing = false;
             (*ctx)[A] = (*ctx)[SP]++;
             (*ctx)[PC] = (*ctx)[SP]++;
             return 3;
-        case 0x0c:      // IAQ a
-            a !=0 ? queuing = true : queuing = false;
+        case 0x0c:  // IAQ a
+            a != 0 ? queuing = true : queuing = false;
             return 2;
-        case 0x10:      // HWN a
+        case 0x10:  // HWN a
             a = static_cast<word>(devices.size());
             return 2;
-        case 0x11:      // HWQ a
-            if (a <= devices.size()) {
+        case 0x11:  // HWQ a
+            if (a < devices.size()) {
                 devices[a]->query();
             }
             return 4;
-        case 0x12:      // HWI a
-            if (a <= devices.size()) {
+        case 0x12:  // HWI a
+            if (catch_fire) return 0;
+            if (a < devices.size()) {
                 devices[a]->interrupt();
             }
             return 4;
 
         default:
             return 0;
+    }
+}
+
+void CPU::interrupt(word msg) {
+    if ((*ctx)[A] != 0) {
+        queuing = true;
+        (*ctx)[SP]--;
+        (*memory)[(*ctx)[SP]] = (*ctx)[PC];
+        (*ctx)[SP]--;
+        (*memory)[(*ctx)[SP]] = (*ctx)[A];
+        (*ctx)[PC] = (*ctx)[A];
+        (*ctx)[A] = msg;
     }
 }
