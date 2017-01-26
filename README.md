@@ -8,8 +8,8 @@ Last specification of the CPU was 1.7. It consisted of a 16 bits word computer w
 There are lots of implementation of the DCPU16 throughout the Internet (GitHub is full of them). 
 It happens that implementing a CPU emulator totally worth as an exercise for learning [computer architecture](https://en.wikipedia.org/wiki/Computer_architecture).
 
-This is by no means a introductory emulator with the only function of learning the principles of computer systems by emulating them, so
-don't take it as  cserious project.
+This is by no means an introductory emulator with the only function of learning the principles of computer systems by emulating them, so
+don't take it as a serious project.
 
 ###Build
 
