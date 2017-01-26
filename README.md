@@ -25,4 +25,4 @@ make
 
 ###Compiler
 
-There is not compiler. You should bring your assembled files for now.
+There is not compiler. You should bring your files assembled for now.
